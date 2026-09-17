@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test:employee": "playwright test tests/employee/Addemployee.spec.ts",
+    "test:addbook": "playwright test tests/library/Addbook.spec.ts",
+    "test:holidays": "playwright test tests/holidays/Holiday.spec.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

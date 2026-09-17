@@ -465,8 +465,8 @@ await expect(
 
 ## Files Involved
 
-- `pages/AddStudentPage.ts`: page object, locators, dropdown/datepicker helpers, submit sequence
+- `pages/student/AddStudentPage.ts`: page object, locators, dropdown/datepicker helpers, submit sequence
 - `utils/DataGenerator.ts`: generated email, phone, and document data
-- `tests/Addstudent.spec.ts`: primary positive flow
-- `tests/AddstudentScenarios.spec.ts`: positive and negative scenario suite     
+- `tests/student/Addstudent.spec.ts`: primary positive flow
+- `tests/student/AddstudentScenarios.spec.ts`: positive and negative scenario suite     
       
