@@ -5,7 +5,7 @@ import { LOGIN_EMAIL, LOGIN_PASSWORD } from '../auth';
 
 const COLLECT_CLASS = '9';
 const COLLECT_SECTION = 'A';
-const COLLECT_STUDENT = 'Riya Joshi';
+const COLLECT_STUDENT = 'Om Agarwal';
 const PAYMENT_MODE = 'Cash';
 const PAYMENT_DAY = 17;
 
@@ -25,7 +25,7 @@ const login = async (page: Page) => {
 };
 
 test.describe('Collect Fee Module', () => {
-  test.only('should collect a fee payment', async ({ page }) => {
+  test('should collect a fee payment', async ({ page }) => {
     test.setTimeout(180000);
     const collectFeePage = new CollectFeePage(page);
 

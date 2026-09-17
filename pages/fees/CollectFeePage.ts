@@ -33,9 +33,7 @@ export class CollectFeePage {
 
   private async selectOption(dropdown: Locator, optionText: string) {
     await dropdown.waitFor({ state: 'visible', timeout: 15000 });
-    await dropdown.scrollIntoViewIfNeeded();
-    const trigger = dropdown.locator('[role="combobox"], button[aria-label="dropdown trigger"], .p-select-dropdown, .p-select-trigger').first();
-    await (await trigger.isVisible().catch(() => false) ? trigger : dropdown).click({ force: true });
+    await dropdown.click({ force: true });
     const listbox = this.page.locator('ul[role="listbox"]:visible, .p-select-list:visible, div[role="listbox"]:visible').last();
     await listbox.waitFor({ state: 'visible', timeout: 15000 });
     const option = listbox.getByRole('option', { name: optionText, exact: true }).first();
@@ -45,16 +43,38 @@ export class CollectFeePage {
     await target.click({ force: true });
   }
 
-  private async getFilterDropdown(label: string, fallbackIndex: number) {
-    const combobox = this.page.getByRole('combobox', { name: label, exact: true }).first();
-    const parent = combobox.locator('xpath=ancestor::p-select[1]');
-    return (await parent.count()) ? parent : this.page.locator('p-select:visible').nth(fallbackIndex);
+  private getFilterCombobox(label: string) {
+    return this.page.getByRole('combobox', { name: label, exact: true }).first();
+  }
+
+  private async selectFilterOption(label: string, optionText: string) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const combobox = this.getFilterCombobox(label);
+      await combobox.waitFor({ state: 'visible', timeout: 15000 });
+      await combobox.click({ force: true });
+
+      const listbox = this.page.locator('ul[role="listbox"]:visible, .p-select-list:visible, div[role="listbox"]:visible').last();
+      await listbox.waitFor({ state: 'visible', timeout: 10000 });
+      const option = listbox.getByRole('option', { name: optionText, exact: true }).last();
+      if (await option.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await option.click({ force: true });
+      } else {
+        await combobox.press('ArrowDown');
+        await combobox.press('Enter');
+      }
+
+      const selected = this.getFilterCombobox(label);
+      if ((await selected.textContent()).trim().includes(optionText)) return;
+      await this.page.keyboard.press('Escape').catch(() => undefined);
+    }
+
+    throw new Error(`Could not select ${optionText} from ${label}.`);
   }
 
   async searchStudent(details: Pick<CollectFeeDetails, 'className' | 'section' | 'studentName'>) {
-    await this.selectOption(await this.getFilterDropdown('Select class', 0), details.className);
-    await this.selectOption(await this.getFilterDropdown('Select section', 1), details.section);
-    await this.selectOption(await this.getFilterDropdown('Select student', 2), details.studentName);
+    await this.selectFilterOption('Select class', details.className);
+    await this.selectFilterOption('Select section', details.section);
+    await this.selectFilterOption('Select student', details.studentName);
     await this.page.getByRole('button', { name: 'Search', exact: true }).click();
     await this.page.getByRole('button', { name: 'All', exact: true }).click();
   }
@@ -73,6 +93,7 @@ export class CollectFeePage {
     await dateCell.click();
 
     const collectButton = this.page.getByRole('button', { name: /Collect Payment ₹/ }).last();
+    await expect(collectButton).toBeEnabled({ timeout: 15000 });
     await collectButton.click();
     const confirmDialog = this.page.getByRole('dialog').last();
     await confirmDialog.getByRole('button', { name: /Collect Payment ₹/ }).click();
